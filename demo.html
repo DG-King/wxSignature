@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>微信前端签名</title>
+	<script src="sha1.js"></script>
+</head>
+<body>
+	<script>
+		//根据微信开发文档，微信生成签名需要的四个参数
+		//1.jsapi_ticket
+		//这个参数需要服务端进行操作，首先根据appid和AppSecret获取access_token（服务端需要进行缓存）
+		//然后根据access_token获取jsapi_ticket（同样需要缓存）
+		var jsapi_ticket = 'test.......';
+		//2.noncestr
+		//这个字段可以由前端生成
+		//生成签名随机串
+	  	function randomString(len) {
+	    	len = len || 32;
+	    	var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+	      	var maxPos = $chars.length;
+	      	var pwd = '';
+	      	for (var i = 0; i < len; i++) {
+	          	pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+	    	}
+	      	return pwd;
+	    };
+	    noncestr = randomString(20);
+	    //3.timestamp
+	    //同样由前端生成，但是有一点注意，这是时间戳是指秒，而不是毫秒
+	    var timestamp = parseInt(new Date().getTime() / 1000);
+	    //4.url
+	    //注意是动态获取当前网址完整的url(请在当前页面alert(location.href.split('#')[0])确认)，包括'http(s)://'部分，以及'？'后面的GET参数部分,但不包括'#'hash后面的部分。
+	    var url = window.location.href.split('#')[0];
+
+	    //有了以上四个参数就可以进行配置
+	    //首先按ASCII 码从小到大排序（字典序）后，使用 URL 键值对的格式（即key1=value1&key2=value2…）拼接成字符串 string1（注意：参数名称都是小写,url不进行转义）
+	    var string1 = 'jsapi_ticket='+  jsapi_ticket   +'&noncestr='+   noncestr   +'&timestamp='+  timestamp  +'&url=' + url;
+	    //签名
+	    var s = new jsSHA(string1,"TEXT");
+		var t = s.getHash("SHA-1","HEX");//t即为签名串
+	</script>
+</body>
+</html>
